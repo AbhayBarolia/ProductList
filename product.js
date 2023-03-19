@@ -137,7 +137,7 @@ function removeItem(e)
         }
     
         document.getElementById('tval').textContent="Total value of products:"+totalValue;
-        //appendChild(document.createTextNode("Total value of products:"+totalValue));
+        
     
 })
 .catch((err)=>{console.log(err);});
