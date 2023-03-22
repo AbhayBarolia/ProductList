@@ -4,25 +4,26 @@ let list= document.getElementById("list");
 addEventListener("DOMContentLoaded",domLoaded);
     function domLoaded(e)
     {   
-        axios.get("https://crudcrud.com/api/4ac1c4ddc9db4b2e806c0fcaabd1fe49/productList").then((res)=>{
-           
-          
-            for(let i=0; i<res.data.length;i++)
-            {
-                let dt= res.data[i];
-                const str =`Product:${dt.productName} Price:${dt.price} P.ID:${dt._id}`;    
-                showData(str);
-               
-            }
-        
-            
-        
-    }).then(()=>{showTotalValue();})
-    .catch((err)=>{console.log(err);});
-        
+          getData();
     }
 
+    async function getData(){
 
+        try { const res= await  axios.get("https://crudcrud.com/api/7dda41a47f734289b88517b7fb013259/productList");
+        for(let i=0; i<res.data.length;i++)
+        {
+            let dt= res.data[i];
+            const str =`Product:${dt.productName} Price:${dt.price} P.ID:${dt._id}`;    
+            showData(str);
+           
+        }
+        showTotalValue();
+    }
+        catch(error){
+            console.log(error)
+        }   
+    }
+    
 function submitform(event){
    
     event.preventDefault();
@@ -31,49 +32,62 @@ function submitform(event){
     price:document.getElementById('price').value
     };
     if(editFlag===false){
-    axios.post("https://crudcrud.com/api/4ac1c4ddc9db4b2e806c0fcaabd1fe49/productList",obj).then((res)=>{console.log(res);
-    let dt= res.data;
-    const str =`Product: ${dt.productName} Price:${dt.price} P.ID:${dt._id}`;          
-    showData(str);
-    
-    }).then(()=>{showTotalValue();}).catch((err)=>{console.log(err);});
-
+        postData(obj);
     }
     else
     {
-        axios.put("https://crudcrud.com/api/4ac1c4ddc9db4b2e806c0fcaabd1fe49/productList/"+edUrl,obj)
-        .then((res)=>{console.log(res);
-        
-        })
-        .catch((err)=>{console.log(err);});
-        
-        axios.get("https://crudcrud.com/api/4ac1c4ddc9db4b2e806c0fcaabd1fe49/productList/"+edUrl).then((res)=>{console.log(res);
-        let dt= res.data;
-        const str =`Product: ${dt.productName} Price:${dt.price} P.ID:${dt._id}`;              
-        showData(str);
-        }).then(()=>{showTotalValue();}).catch((err)=>{console.log(err);});
-
+        putData(obj);
         editFlag=false;
         edUrl="";
     }
 }
+async function postData(obj){
+    try{
+    const res = await axios.post("https://crudcrud.com/api/7dda41a47f734289b88517b7fb013259/productList",obj);
+    let dt= res.data;
+    const str =`Product: ${dt.productName} Price:${dt.price} P.ID:${dt._id}`;          
+    showData(str);
+    showTotalValue();
+    }
+    catch(error){
+        console.log(error);
+    }
+
+}
+async function putData(obj){
+    try{
+    const put = await axios.post("https://crudcrud.com/api/7dda41a47f734289b88517b7fb013259/productList",obj);
+    const res = await axios.get("https://crudcrud.com/api/7dda41a47f734289b88517b7fb013259/productList/"+edUrl)
+    let dt= res.data;
+    const str =`Product: ${dt.productName} Price:${dt.price} P.ID:${dt._id}`;          
+    showData(str);
+    showTotalValue();
+    }
+    catch(error){
+        console.log(error);
+    }
+
+}
+
 list.addEventListener("click",removeItem);
 list.addEventListener("click",editItem);
 
-function removeItem(e)
+async function removeItem(e)
     {
         if(e.target.classList.contains("delete"))
     {
         if(confirm("Do you want to delete the expense"))
-        {
+        {  try{
             let li=e.target.parentElement;
             let str=li.textContent;
             let str1=str.slice(-34);
             let str2=str1.substring(0,24);
             list.removeChild(li);
-            axios.delete("https://crudcrud.com/api/4ac1c4ddc9db4b2e806c0fcaabd1fe49/productList/"+str2).then((res)=>{console.log(res);})
-            .then(()=>{showTotalValue();}).catch((err)=>{console.log(err);});
-             
+            const res= await axios.delete("https://crudcrud.com/api/7dda41a47f734289b88517b7fb013259/productList/"+str2)
+            console.log(res);
+            showTotalValue();
+        }
+        catch(error){console.log(error);}
         }
         
     }
@@ -81,25 +95,23 @@ function removeItem(e)
 
     
 
-    function editItem(e)
+    async function editItem(e)
     {
         if(e.target.classList.contains("edit"))
-        {   editFlag=true;
+        {  try{
+            editFlag=true;
             let li=e.target.parentElement;
             let str=li.textContent;
             let str1=str.slice(-34);
             let str2=str1.substring(0,24);
-            
-
-            axios.get("https://crudcrud.com/api/4ac1c4ddc9db4b2e806c0fcaabd1fe49/productList/"+str2)
-            .then((res)=>{
+            const res= await axios.get("https://crudcrud.com/api/7dda41a47f734289b88517b7fb013259/productList/"+str2);
                 document.getElementById('productName').value =res.data.productName;
                 document.getElementById('price').value=res.data.price;
-            })
-            .catch((err)=>{console.log(err);});
-           
-            list.removeChild(li);
-            edUrl=str2;    
+                list.removeChild(li);
+                edUrl=str2;  
+            
+            }   
+            catch(err){console.log(err)}      
         }
     }    
 
@@ -124,9 +136,9 @@ function removeItem(e)
         edbtn.style.margin="5px";
         
     }
-    function showTotalValue()
-    {
-        axios.get("https://crudcrud.com/api/4ac1c4ddc9db4b2e806c0fcaabd1fe49/productList").then((res)=>{
+    async function showTotalValue()
+    {   try{
+        const res= await axios.get("https://crudcrud.com/api/7dda41a47f734289b88517b7fb013259/productList")
            
          let totalValue=0;
         for(let i=0; i<res.data.length;i++)
@@ -137,9 +149,13 @@ function removeItem(e)
         }
     
         document.getElementById('tval').textContent="Total value of products:"+totalValue;
-        
-    
-})
-.catch((err)=>{console.log(err);});
+    }
+    catch(err){console.log(err);};
     
 }
+
+
+
+
+
+
